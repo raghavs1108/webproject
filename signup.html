@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<meta charset="utf-8" />
+<head>
+<title>Chatty | Sign Up</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+@import url("http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css");
+@import url("http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700");
+*{margin:0; padding:0}
+body{background:#294072; font-family: 'Source Sans Pro', sans-serif}
+.form{width:400px; margin:0 auto; background:#1C2B4A; margin-top:150px}
+.header{height:44px; background:#17233B}
+.header h2{height:44px; line-height:44px; color:#fff; text-align:center}
+.login{padding:0 20px}
+.login span.un{width:10%; text-align:center; color:#0C6; border-radius:3px 0 0 3px}
+.text{background:#12192C; width:90%; border-radius:0 3px 3px 0; border:none; outline:none; color:#999; font-family: 'Source Sans Pro', sans-serif} 
+.text,.login span.un{display:inline-block; vertical-align:top; height:40px; line-height:40px; background:#12192C;}
+
+.btn{height:40px; border:none; background:#0C6; width:100%; outline:none; font-family: 'Source Sans Pro', sans-serif; font-size:20px; font-weight:bold; color:#eee; border-bottom:solid 3px #093; border-radius:3px; cursor:pointer}
+ul li{height:40px; margin:15px 0; list-style:none}
+.span{display:table; width:100%; font-size:14px;}
+.ch{display:inline-block; width:50%; color:#CCC}
+.ch a{color:#CCC; text-decoration:none}
+.ch:nth-child(2){text-align:right}
+/*social*/
+.social{height:30px; line-height:30px; display:table; width:100%}
+.social div{display:inline-block; width:42%; color:#eee; font-size:12px; text-align:center; border-radius:3px}
+.social div i.fa{font-size:16px; line-height:30px}
+.fb{background:#3B5A9A; border-bottom:solid 3px #036} .tw{background:#2CA8D2; margin-left:16%; border-bottom:solid 3px #3399CC}
+/*bottom*/
+.sign{width:90%; padding:0 5%; height:50px; display:table; background:#17233B}
+.sign div{display:inline-block; width:50%; line-height:50px; color:#ccc; font-size:14px}
+.up{text-align:right}
+.up a{display:block; background:#096; text-align:center; height:35px; line-height:35px; width:50%; font-size:16px; text-decoration:none; color:#eee; border-bottom:solid 3px #006633; border-radius:3px; font-weight:bold; margin-left:50%}
+@media(max-width:480px){ .form{width:100%}}
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript">
+	function init() {
+		user = document.getElementById("user");
+		pwd1 = document.getElementById("pwd1");
+		pwd2 = document.getElementById("pwd2");
+
+	}
+
+	function registerUser(event){
+		event.preventDefault();
+		if (pwd1.value != pwd2.value){
+			alert("passwords don't match!");
+		}
+		else{
+			$.get("http://localhost:8080/registeruser/"+user.value+"/"+pwd1.value, registrationHandler);
+		}
+	}
+
+	function registrationHandler(data, status, xhr){
+		if (data == "already registered"){
+			document.getElementById("status").innerHTML = "<br/>Username taken";
+			document.getElementById("status").style.color = "red";
+		}
+		else{
+			document.getElementById("status").innerHTML = "";
+			document.getElementById("status").style = "green";
+			if (localStorage) {
+  				localStorage['username'] = user.value;
+			} 
+			else {
+  			// No support. Use a fallback such as browser cookies or store on the server.
+			}
+			window.location.replace("chat.html");
+		}
+	}
+
+	function checkPwdMatch () {
+		if (pwd1.value != pwd2.value){
+			document.getElementById("lock2").style.color="red";
+		}
+		else{
+			document.getElementById("lock2").style.color="green";
+		}
+	}
+</script>
+</head>
+<body onload="init();">
+<div class="form">
+<div class="header"><h2>Sign Up</h2></div>
+<div class="login">
+<form action="">
+<ul>
+<li>
+<span class="un"><i class="fa fa-user"></i></span><input id="user" type="text" required class="text" placeholder="User Name"/></li>
+<li>
+<span class="un"><i id="lock1" class="fa fa-lock"></i></span><input id="pwd1" type="password" required class="text" placeholder="Password"/></li>
+<li>
+<span class="un"><i id="lock2" class="fa fa-lock"></i></span><input id="pwd2" type="password" required class="text" placeholder="Confirm Password" onblur="checkPwdMatch();" />
+<span id="status"></span>
+</li>
+<li>
+<input type="submit" value="SUBMIT" class="btn" onclick="registerUser(event);">
+</li>
+</ul>
+</form>
+</div><br/>
+<div class="sign">
+<div class="need">Already registered ?</div>
+<div class="up"><a href="signin.html">Sign In</a></div>
+</body>
+</html>

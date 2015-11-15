@@ -1,0 +1,100 @@
+﻿<html>
+<head>
+    <title>Chatty</title>
+    <link href="assets/css/bootstrap.css" rel="stylesheet" />
+    <link href="assets/css/font-awesome.css" rel="stylesheet" />
+    <link href="assets/css/style.css" rel="stylesheet" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript">
+    function init() {
+        if (localStorage){
+            username = localStorage['username'];
+        }
+        else{ // no localStorage. App won't work...
+        }
+    outer = document.getElementById("outer");
+    source = new EventSource("http://localhost:8081/");
+    source.onmessage = updateReceived;
+    }
+    function updateReceived(event) {
+        if (event.data.split(";")[0] != username) {
+            hr = document.createElement("hr");
+            hr.className = "hr-clas";
+            div1 = document.createElement("div");
+            div1.className = "chat-box-left";
+            div1.innerHTML = event.data.split(";")[1];
+            alert(event.data);
+            div2 = document.createElement("div");
+            div2.className = "chat-box-name-left";
+            div2.innerHTML = '<img src="assets/img/user.png" alt="bootstrap Chat box user image" class="img-circle" /> - '+ event.data.split(";")[0];
+            outer.appendChild(div1);
+            outer.appendChild(div2);
+            outer.appendChild(hr);
+            var topPos = div2.offsetTop;
+            outer.scrollTop = topPos;
+        }
+    }
+
+    function addMsg () {
+        hr = document.createElement("hr");
+        hr.className = "hr-clas";
+        div1 = document.createElement("div");
+        div1.className = "chat-box-right";
+        div1.innerHTML = document.getElementById("ip").value;
+        $.get("http://localhost:8080/updateserver/"+username+"/"+document.getElementById("ip").value);
+        div2 = document.createElement("div");
+        div2.className = "chat-box-name-right";
+        div2.innerHTML = '<img src="assets/img/user.gif" alt="bootstrap Chat box user image" class="img-circle" /> - '+ username;
+        outer.appendChild(div1);
+        outer.appendChild(div2);
+        outer.appendChild(hr);
+        var topPos = div2.offsetTop;
+        outer.scrollTop = topPos;
+        document.getElementById("ip").value = "";
+    }
+    </script>
+</head>
+<body onload="init();">
+
+
+    <div class="container">
+        <div class="row pad-top pad-bottom">
+            <div class=" col-lg-6 col-md-6 col-sm-6">
+                <div  class="chat-box-div">
+                    <div class="chat-box-head">
+                        GROUP CHAT HISTORY
+                            <div class="btn-group pull-right">
+                                <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <span class="fa fa-cogs"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#"><span class="fa fa-map-marker"></span>&nbsp;Invisible</a></li>
+                                    <li><a href="#"><span class="fa fa-comments-o"></span>&nbsp;Online</a></li>
+                                    <li><a href="#"><span class="fa fa-lock"></span>&nbsp;Busy</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#"><span class="fa fa-circle-o-notch"></span>&nbsp;Logout</a></li>
+                                </ul>
+                            </div>
+                    </div>
+                    <div id="outer" class="panel-body chat-box-main">
+                    </div>
+                    <div class="chat-box-footer">
+                        <div class="input-group">
+                            <input type="text" id="ip" class="form-control" placeholder="Enter Text Here...">
+                            <span class="input-group-btn">
+                                <button class="btn btn-info" onclick="addMsg();" type="button">SEND</button>
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            
+    </div>
+    <script src="assets/js/jquery-1.11.1.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+</body>
+
+</html>
