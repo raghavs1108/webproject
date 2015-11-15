@@ -1,11 +1,14 @@
 import sqlite3
 from gevent import monkey; monkey.patch_all()
 from gevent import sleep
+from gevent import Greenlet
+from gevent.coros import BoundedSemaphore
 import time
 import bottle
 import sys
 from bottle import get, post, request, response
 from bottle import GeventServer, run
+from gevent.pool import Group
 def enable_cors(fn):
     def _enable_cors(*args, **kwargs):
         # set CORS headers
@@ -113,19 +116,67 @@ def updateserver(username, data):
 	return str(index)+":"+username+":"+data+"\n"
 	fileModified = True 
 
-@get('/receiveupdate')
-@enable_cors
-def receiveupdate():
-	global fileModified
-	# broadcast the data in the group chat to all the users...
-	response.content_type  = 'text/event-stream'
-	response.cache_control = 'no-cache'
-	# Set client-side auto-reconnect timeout, ms.
-	yield 'retry: 100\n\n'
-	while True:
-		if fileModified :
-			fileModified = False
-			yield 'data: %i\n\n' % n
+sem = BoundedSemaphore()
+
+class Chatlet(Greenlet):
+
+    def __init__(self, message, n):
+        Greenlet.__init__(self)
+        self.message = message
+        self.n = n
+        print 'Hello World'
+
+    def _run(self):
+        print(self.n)
+        print 'Hello World'
+        prev = -1; 
+        while True:
+            print self.n
+            sleep(2)
+            sem.acquire()
+            f = open("datafile.txt")
+            lines = f.readlines()
+            f.close()
+            print 'Im in', self.n
+            sem.release()
+            cur = int(lines[-1].split(":")[0])
+            print cur
+            if cur != prev:
+                prev = cur 
+                data = lines[-1].split(":")
+                #print 'data:'
+                yield 'data: '+ data[1]+";"+data[2]+"\n\n"
+            '''
+            yield 'retry: 100\n'
+            if cur != prev:
+                prev = cur 
+                data = lines[-1].split(":")
+                yield 'data: '+ data[1]+";"+data[2]+"\n\n"
+            '''
+        '''
+        
+        prev = -1; 
+        # broadcast the data in the group chat to all the users...
+        # Set client-side auto-reconnect timeout, ms.
+        while True:
+            print(self.n)
+            f = open("datafile.txt")
+            lines = f.readlines()
+            cur = int(lines[-1].split(":")[0])
+            yield 'retry: 100\n'
+            if cur != prev:
+                prev = cur 
+                data = lines[-1].split(":")
+                yield 'data: '+ data[1]+";"+data[2]+"\n\n"
+            f.close()
+        '''
+
+N = 1
+@get('/requestupdate')
+def request_update():
+    global N
+    thread = Chatlet.spawn('Hello', N)
+    N += 1
 
 
 if __name__ == '__main__':
